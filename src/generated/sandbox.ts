@@ -1,27 +1,32 @@
 /* eslint-disable */
 import Long from "long";
-import _m0 from "protobufjs/minimal.js";
-import { MoneyValue } from "./common.js";
+import * as _m0 from "protobufjs/minimal";
+import { MoneyValue } from "./common";
 import { CallContext, CallOptions } from "nice-grpc-common";
-import { GetAccountsRequest, GetAccountsResponse } from "./users.js";
+import { GetAccountsRequest, GetAccountsResponse } from "./users";
 import {
   PostOrderRequest,
   PostOrderResponse,
+  ReplaceOrderRequest,
   GetOrdersRequest,
   GetOrdersResponse,
   CancelOrderRequest,
   CancelOrderResponse,
   GetOrderStateRequest,
   OrderState,
-} from "./orders.js";
+} from "./orders";
 import {
   PositionsRequest,
   PositionsResponse,
   OperationsRequest,
   OperationsResponse,
+  GetOperationsByCursorRequest,
+  GetOperationsByCursorResponse,
   PortfolioRequest,
   PortfolioResponse,
-} from "./operations.js";
+  WithdrawLimitsRequest,
+  WithdrawLimitsResponse,
+} from "./operations";
 
 export const protobufPackage = "tinkoff.public.invest.api.contract.v1";
 
@@ -390,6 +395,15 @@ export const SandboxServiceDefinition = {
       responseStream: false,
       options: {},
     },
+    /** Метод изменения выставленной заявки. */
+    replaceSandboxOrder: {
+      name: "ReplaceSandboxOrder",
+      requestType: ReplaceOrderRequest,
+      requestStream: false,
+      responseType: PostOrderResponse,
+      responseStream: false,
+      options: {},
+    },
     /** Метод получения списка активных заявок по счёту в песочнице. */
     getSandboxOrders: {
       name: "GetSandboxOrders",
@@ -435,6 +449,15 @@ export const SandboxServiceDefinition = {
       responseStream: false,
       options: {},
     },
+    /** Метод получения операций в песочнице по номеру счета с пагинацией. */
+    getSandboxOperationsByCursor: {
+      name: "GetSandboxOperationsByCursor",
+      requestType: GetOperationsByCursorRequest,
+      requestStream: false,
+      responseType: GetOperationsByCursorResponse,
+      responseStream: false,
+      options: {},
+    },
     /** Метод получения портфолио в песочнице. */
     getSandboxPortfolio: {
       name: "GetSandboxPortfolio",
@@ -450,6 +473,15 @@ export const SandboxServiceDefinition = {
       requestType: SandboxPayInRequest,
       requestStream: false,
       responseType: SandboxPayInResponse,
+      responseStream: false,
+      options: {},
+    },
+    /** Метод получения доступного остатка для вывода средств в песочнице. */
+    getSandboxWithdrawLimits: {
+      name: "GetSandboxWithdrawLimits",
+      requestType: WithdrawLimitsRequest,
+      requestStream: false,
+      responseType: WithdrawLimitsResponse,
       responseStream: false,
       options: {},
     },
@@ -477,6 +509,11 @@ export interface SandboxServiceServiceImplementation<CallContextExt = {}> {
     request: PostOrderRequest,
     context: CallContext & CallContextExt
   ): Promise<PostOrderResponse>;
+  /** Метод изменения выставленной заявки. */
+  replaceSandboxOrder(
+    request: ReplaceOrderRequest,
+    context: CallContext & CallContextExt
+  ): Promise<PostOrderResponse>;
   /** Метод получения списка активных заявок по счёту в песочнице. */
   getSandboxOrders(
     request: GetOrdersRequest,
@@ -502,6 +539,11 @@ export interface SandboxServiceServiceImplementation<CallContextExt = {}> {
     request: OperationsRequest,
     context: CallContext & CallContextExt
   ): Promise<OperationsResponse>;
+  /** Метод получения операций в песочнице по номеру счета с пагинацией. */
+  getSandboxOperationsByCursor(
+    request: GetOperationsByCursorRequest,
+    context: CallContext & CallContextExt
+  ): Promise<GetOperationsByCursorResponse>;
   /** Метод получения портфолио в песочнице. */
   getSandboxPortfolio(
     request: PortfolioRequest,
@@ -512,6 +554,11 @@ export interface SandboxServiceServiceImplementation<CallContextExt = {}> {
     request: SandboxPayInRequest,
     context: CallContext & CallContextExt
   ): Promise<SandboxPayInResponse>;
+  /** Метод получения доступного остатка для вывода средств в песочнице. */
+  getSandboxWithdrawLimits(
+    request: WithdrawLimitsRequest,
+    context: CallContext & CallContextExt
+  ): Promise<WithdrawLimitsResponse>;
 }
 
 export interface SandboxServiceClient<CallOptionsExt = {}> {
@@ -533,6 +580,11 @@ export interface SandboxServiceClient<CallOptionsExt = {}> {
   /** Метод выставления торгового поручения в песочнице. */
   postSandboxOrder(
     request: PostOrderRequest,
+    options?: CallOptions & CallOptionsExt
+  ): Promise<PostOrderResponse>;
+  /** Метод изменения выставленной заявки. */
+  replaceSandboxOrder(
+    request: ReplaceOrderRequest,
     options?: CallOptions & CallOptionsExt
   ): Promise<PostOrderResponse>;
   /** Метод получения списка активных заявок по счёту в песочнице. */
@@ -560,6 +612,11 @@ export interface SandboxServiceClient<CallOptionsExt = {}> {
     request: OperationsRequest,
     options?: CallOptions & CallOptionsExt
   ): Promise<OperationsResponse>;
+  /** Метод получения операций в песочнице по номеру счета с пагинацией. */
+  getSandboxOperationsByCursor(
+    request: GetOperationsByCursorRequest,
+    options?: CallOptions & CallOptionsExt
+  ): Promise<GetOperationsByCursorResponse>;
   /** Метод получения портфолио в песочнице. */
   getSandboxPortfolio(
     request: PortfolioRequest,
@@ -570,6 +627,11 @@ export interface SandboxServiceClient<CallOptionsExt = {}> {
     request: SandboxPayInRequest,
     options?: CallOptions & CallOptionsExt
   ): Promise<SandboxPayInResponse>;
+  /** Метод получения доступного остатка для вывода средств в песочнице. */
+  getSandboxWithdrawLimits(
+    request: WithdrawLimitsRequest,
+    options?: CallOptions & CallOptionsExt
+  ): Promise<WithdrawLimitsResponse>;
 }
 
 if (_m0.util.Long !== Long) {

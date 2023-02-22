@@ -1,9 +1,9 @@
 /* eslint-disable */
 import Long from "long";
-import _m0 from "protobufjs/minimal.js";
-import { Quotation, MoneyValue } from "./common.js";
+import * as _m0 from "protobufjs/minimal";
+import { Quotation, MoneyValue } from "./common";
 import { CallContext, CallOptions } from "nice-grpc-common";
-import { Timestamp } from "./google/protobuf/timestamp.js";
+import { Timestamp } from "./google/protobuf/timestamp";
 
 export const protobufPackage = "tinkoff.public.invest.api.contract.v1";
 
@@ -149,7 +149,7 @@ export function stopOrderTypeToJSON(object: StopOrderType): string {
 
 /** Запрос выставления стоп-заявки. */
 export interface PostStopOrderRequest {
-  /** Figi-идентификатор инструмента. */
+  /** Deprecated Figi-идентификатор инструмента. Необходимо использовать instrument_id. */
   figi: string;
   /** Количество лотов. */
   quantity: number;
@@ -167,6 +167,8 @@ export interface PostStopOrderRequest {
   stopOrderType: StopOrderType;
   /** Дата и время окончания действия стоп-заявки в часовом поясе UTC. **Для ExpirationType = GoodTillDate заполнение обязательно**. */
   expireDate?: Date;
+  /** Идентификатор инструмента, принимает значения Figi или instrument_uid. */
+  instrumentId: string;
 }
 
 /** Результат выставления стоп-заявки. */
@@ -225,6 +227,8 @@ export interface StopOrder {
   price?: MoneyValue;
   /** Цена активации стоп-заявки за 1 инструмент. Для получения стоимости лота требуется умножить на лотность инструмента. */
   stopPrice?: MoneyValue;
+  /** instrument_uid идентификатор инструмента. */
+  instrumentUid: string;
 }
 
 function createBasePostStopOrderRequest(): PostStopOrderRequest {
@@ -238,6 +242,7 @@ function createBasePostStopOrderRequest(): PostStopOrderRequest {
     expirationType: 0,
     stopOrderType: 0,
     expireDate: undefined,
+    instrumentId: "",
   };
 }
 
@@ -275,6 +280,9 @@ export const PostStopOrderRequest = {
         toTimestamp(message.expireDate),
         writer.uint32(74).fork()
       ).ldelim();
+    }
+    if (message.instrumentId !== "") {
+      writer.uint32(82).string(message.instrumentId);
     }
     return writer;
   },
@@ -318,6 +326,9 @@ export const PostStopOrderRequest = {
             Timestamp.decode(reader, reader.uint32())
           );
           break;
+        case 10:
+          message.instrumentId = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -347,6 +358,9 @@ export const PostStopOrderRequest = {
       expireDate: isSet(object.expireDate)
         ? fromJsonTimestamp(object.expireDate)
         : undefined,
+      instrumentId: isSet(object.instrumentId)
+        ? String(object.instrumentId)
+        : "",
     };
   },
 
@@ -372,6 +386,8 @@ export const PostStopOrderRequest = {
       (obj.stopOrderType = stopOrderTypeToJSON(message.stopOrderType));
     message.expireDate !== undefined &&
       (obj.expireDate = message.expireDate.toISOString());
+    message.instrumentId !== undefined &&
+      (obj.instrumentId = message.instrumentId);
     return obj;
   },
 };
@@ -657,6 +673,7 @@ function createBaseStopOrder(): StopOrder {
     expirationTime: undefined,
     price: undefined,
     stopPrice: undefined,
+    instrumentUid: "",
   };
 }
 
@@ -707,6 +724,9 @@ export const StopOrder = {
     if (message.stopPrice !== undefined) {
       MoneyValue.encode(message.stopPrice, writer.uint32(90).fork()).ldelim();
     }
+    if (message.instrumentUid !== "") {
+      writer.uint32(98).string(message.instrumentUid);
+    }
     return writer;
   },
 
@@ -756,6 +776,9 @@ export const StopOrder = {
         case 11:
           message.stopPrice = MoneyValue.decode(reader, reader.uint32());
           break;
+        case 12:
+          message.instrumentUid = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -793,6 +816,9 @@ export const StopOrder = {
       stopPrice: isSet(object.stopPrice)
         ? MoneyValue.fromJSON(object.stopPrice)
         : undefined,
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : "",
     };
   },
 
@@ -822,6 +848,8 @@ export const StopOrder = {
       (obj.stopPrice = message.stopPrice
         ? MoneyValue.toJSON(message.stopPrice)
         : undefined);
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
     return obj;
   },
 };

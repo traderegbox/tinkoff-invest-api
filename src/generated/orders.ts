@@ -1,9 +1,9 @@
 /* eslint-disable */
 import Long from "long";
-import _m0 from "protobufjs/minimal.js";
-import { Quotation, MoneyValue, Ping } from "./common.js";
+import * as _m0 from "protobufjs/minimal";
+import { Quotation, MoneyValue, Ping } from "./common";
 import { CallContext, CallOptions } from "nice-grpc-common";
-import { Timestamp } from "./google/protobuf/timestamp.js";
+import { Timestamp } from "./google/protobuf/timestamp";
 
 export const protobufPackage = "tinkoff.public.invest.api.contract.v1";
 
@@ -231,25 +231,29 @@ export interface OrderTrades {
   trades: OrderTrade[];
   /** Идентификатор счёта. */
   accountId: string;
+  /** UID идентификатор инструмента. */
+  instrumentUid: string;
 }
 
 /** Информация о сделке. */
 export interface OrderTrade {
   /** Дата и время совершения сделки в часовом поясе UTC. */
   dateTime?: Date;
-  /** Цена одного инструмента, по которой совершена сделка. */
+  /** Цена за 1 инструмент, по которой совершена сделка. */
   price?: Quotation;
-  /** Количество лотов в сделке. */
+  /** Количество штук в сделке. */
   quantity: number;
+  /** Идентификатор сделки. */
+  tradeId: string;
 }
 
 /** Запрос выставления торгового поручения. */
 export interface PostOrderRequest {
-  /** Figi-идентификатор инструмента. */
+  /** Deprecated Figi-идентификатор инструмента. Необходимо использовать instrument_id. */
   figi: string;
   /** Количество лотов. */
   quantity: number;
-  /** Цена одного инструмента. Для получения стоимости лота требуется умножить на лотность инструмента. Игнорируется для рыночных поручений. */
+  /** Цена за 1 инструмент. Для получения стоимости лота требуется умножить на лотность инструмента. Игнорируется для рыночных поручений. */
   price?: Quotation;
   /** Направление операции. */
   direction: OrderDirection;
@@ -259,6 +263,8 @@ export interface PostOrderRequest {
   orderType: OrderType;
   /** Идентификатор запроса выставления поручения для целей идемпотентности. Максимальная длина 36 символов. */
   orderId: string;
+  /** Идентификатор инструмента, принимает значения Figi или Instrument_uid. */
+  instrumentId: string;
 }
 
 /** Информация о выставлении поручения. */
@@ -273,7 +279,7 @@ export interface PostOrderResponse {
   lotsExecuted: number;
   /** Начальная цена заявки. Произведение количества запрошенных лотов на цену. */
   initialOrderPrice?: MoneyValue;
-  /** Исполненная цена заявки. Произведение средней цены покупки на количество лотов. */
+  /** Исполненная средняя цена 1 одного инструмента в заявки. */
   executedOrderPrice?: MoneyValue;
   /** Итоговая стоимость заявки, включающая все комиссии. */
   totalOrderAmount?: MoneyValue;
@@ -295,6 +301,8 @@ export interface PostOrderResponse {
   message: string;
   /** Начальная цена заявки в пунктах (для фьючерсов). */
   initialOrderPricePt?: Quotation;
+  /** UID идентификатор инструмента. */
+  instrumentUid: string;
 }
 
 /** Запрос отмены торгового поручения. */
@@ -369,15 +377,17 @@ export interface OrderState {
   orderType: OrderType;
   /** Дата и время выставления заявки в часовом поясе UTC. */
   orderDate?: Date;
+  /** UID идентификатор инструмента. */
+  instrumentUid: string;
 }
 
 /** Сделки в рамках торгового поручения. */
 export interface OrderStage {
-  /** Цена за 1 инструмент. Для получения стоимости лота требуется умножить на лотность инструмента.. */
+  /** Цена за 1 инструмент. Для получения стоимости лота требуется умножить на лотность инструмента. */
   price?: MoneyValue;
   /** Количество лотов. */
   quantity: number;
-  /** Идентификатор торговой операции. */
+  /** Идентификатор сделки. */
   tradeId: string;
 }
 
@@ -523,6 +533,7 @@ function createBaseOrderTrades(): OrderTrades {
     figi: "",
     trades: [],
     accountId: "",
+    instrumentUid: "",
   };
 }
 
@@ -551,6 +562,9 @@ export const OrderTrades = {
     }
     if (message.accountId !== "") {
       writer.uint32(50).string(message.accountId);
+    }
+    if (message.instrumentUid !== "") {
+      writer.uint32(58).string(message.instrumentUid);
     }
     return writer;
   },
@@ -582,6 +596,9 @@ export const OrderTrades = {
         case 6:
           message.accountId = reader.string();
           break;
+        case 7:
+          message.instrumentUid = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -604,6 +621,9 @@ export const OrderTrades = {
         ? object.trades.map((e: any) => OrderTrade.fromJSON(e))
         : [],
       accountId: isSet(object.accountId) ? String(object.accountId) : "",
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : "",
     };
   },
 
@@ -623,12 +643,14 @@ export const OrderTrades = {
       obj.trades = [];
     }
     message.accountId !== undefined && (obj.accountId = message.accountId);
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
     return obj;
   },
 };
 
 function createBaseOrderTrade(): OrderTrade {
-  return { dateTime: undefined, price: undefined, quantity: 0 };
+  return { dateTime: undefined, price: undefined, quantity: 0, tradeId: "" };
 }
 
 export const OrderTrade = {
@@ -647,6 +669,9 @@ export const OrderTrade = {
     }
     if (message.quantity !== 0) {
       writer.uint32(24).int64(message.quantity);
+    }
+    if (message.tradeId !== "") {
+      writer.uint32(34).string(message.tradeId);
     }
     return writer;
   },
@@ -669,6 +694,9 @@ export const OrderTrade = {
         case 3:
           message.quantity = longToNumber(reader.int64() as Long);
           break;
+        case 4:
+          message.tradeId = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -684,6 +712,7 @@ export const OrderTrade = {
         : undefined,
       price: isSet(object.price) ? Quotation.fromJSON(object.price) : undefined,
       quantity: isSet(object.quantity) ? Number(object.quantity) : 0,
+      tradeId: isSet(object.tradeId) ? String(object.tradeId) : "",
     };
   },
 
@@ -695,6 +724,7 @@ export const OrderTrade = {
       (obj.price = message.price ? Quotation.toJSON(message.price) : undefined);
     message.quantity !== undefined &&
       (obj.quantity = Math.round(message.quantity));
+    message.tradeId !== undefined && (obj.tradeId = message.tradeId);
     return obj;
   },
 };
@@ -708,6 +738,7 @@ function createBasePostOrderRequest(): PostOrderRequest {
     accountId: "",
     orderType: 0,
     orderId: "",
+    instrumentId: "",
   };
 }
 
@@ -736,6 +767,9 @@ export const PostOrderRequest = {
     }
     if (message.orderId !== "") {
       writer.uint32(58).string(message.orderId);
+    }
+    if (message.instrumentId !== "") {
+      writer.uint32(66).string(message.instrumentId);
     }
     return writer;
   },
@@ -768,6 +802,9 @@ export const PostOrderRequest = {
         case 7:
           message.orderId = reader.string();
           break;
+        case 8:
+          message.instrumentId = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -789,6 +826,9 @@ export const PostOrderRequest = {
         ? orderTypeFromJSON(object.orderType)
         : 0,
       orderId: isSet(object.orderId) ? String(object.orderId) : "",
+      instrumentId: isSet(object.instrumentId)
+        ? String(object.instrumentId)
+        : "",
     };
   },
 
@@ -805,6 +845,8 @@ export const PostOrderRequest = {
     message.orderType !== undefined &&
       (obj.orderType = orderTypeToJSON(message.orderType));
     message.orderId !== undefined && (obj.orderId = message.orderId);
+    message.instrumentId !== undefined &&
+      (obj.instrumentId = message.instrumentId);
     return obj;
   },
 };
@@ -827,6 +869,7 @@ function createBasePostOrderResponse(): PostOrderResponse {
     orderType: 0,
     message: "",
     initialOrderPricePt: undefined,
+    instrumentUid: "",
   };
 }
 
@@ -904,6 +947,9 @@ export const PostOrderResponse = {
         writer.uint32(130).fork()
       ).ldelim();
     }
+    if (message.instrumentUid !== "") {
+      writer.uint32(138).string(message.instrumentUid);
+    }
     return writer;
   },
 
@@ -980,6 +1026,9 @@ export const PostOrderResponse = {
             reader.uint32()
           );
           break;
+        case 17:
+          message.instrumentUid = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -1032,6 +1081,9 @@ export const PostOrderResponse = {
       initialOrderPricePt: isSet(object.initialOrderPricePt)
         ? Quotation.fromJSON(object.initialOrderPricePt)
         : undefined,
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : "",
     };
   },
 
@@ -1084,6 +1136,8 @@ export const PostOrderResponse = {
       (obj.initialOrderPricePt = message.initialOrderPricePt
         ? Quotation.toJSON(message.initialOrderPricePt)
         : undefined);
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
     return obj;
   },
 };
@@ -1370,6 +1424,7 @@ function createBaseOrderState(): OrderState {
     currency: "",
     orderType: 0,
     orderDate: undefined,
+    instrumentUid: "",
   };
 }
 
@@ -1459,6 +1514,9 @@ export const OrderState = {
         writer.uint32(146).fork()
       ).ldelim();
     }
+    if (message.instrumentUid !== "") {
+      writer.uint32(154).string(message.instrumentUid);
+    }
     return writer;
   },
 
@@ -1546,6 +1604,9 @@ export const OrderState = {
             Timestamp.decode(reader, reader.uint32())
           );
           break;
+        case 19:
+          message.instrumentUid = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -1604,6 +1665,9 @@ export const OrderState = {
       orderDate: isSet(object.orderDate)
         ? fromJsonTimestamp(object.orderDate)
         : undefined,
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : "",
     };
   },
 
@@ -1665,6 +1729,8 @@ export const OrderState = {
       (obj.orderType = orderTypeToJSON(message.orderType));
     message.orderDate !== undefined &&
       (obj.orderDate = message.orderDate.toISOString());
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
     return obj;
   },
 };

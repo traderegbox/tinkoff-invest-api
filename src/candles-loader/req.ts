@@ -77,11 +77,11 @@ export class CandlesReq {
   }
 
   protected async loadChunkFromApi() {
-    const { figi, interval } = this.params;
+    const { figi, interval, instrumentId } = this.params;
     const { from, to } = this.dateIterator.getCurrentChunkRange();
     const apiStr = this.api.isBacktest ? 'API (backtest)' : 'API';
     this.debug(`Загружаю свечи из ${apiStr}: ${from.toISOString()} - ${to.toISOString()}`);
-    const { candles } = await this.api.marketdata.getCandles({ figi, interval, from, to });
+    const { candles } = await this.api.marketdata.getCandles({ figi, interval, from, to, instrumentId });
     this.debug(`Загружено свечей: ${candles.length}`);
     return candles;
   }

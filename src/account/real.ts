@@ -2,12 +2,16 @@
  * Реальный счет
  */
 import { TinkoffInvestApi } from '../api.js';
-import { OperationsRequest } from '../generated/operations.js';
+import { OperationsRequest, PortfolioRequest_CurrencyRequest } from '../generated/operations.js';
 import { PostOrderRequest } from '../generated/orders.js';
 import { OmitAccount } from './types.js';
 
 export class RealAccount {
-  constructor(public api: TinkoffInvestApi, public accountId: string) {}
+  constructor(
+    public api: TinkoffInvestApi,
+    public accountId: string,
+    public currency: PortfolioRequest_CurrencyRequest
+    ) {}
 
   isSandbox() { return false; }
 
@@ -17,7 +21,7 @@ export class RealAccount {
   }
 
   async getPortfolio() {
-    return this.api.operations.getPortfolio({ accountId: this.accountId });
+    return this.api.operations.getPortfolio({ accountId: this.accountId, currency: this.currency});
   }
 
   async getOperations(request: OmitAccount<OperationsRequest>) {

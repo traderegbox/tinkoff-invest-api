@@ -2,13 +2,17 @@
  * Счет в песочнице
  */
 import { TinkoffInvestApi } from '../api.js';
-import { OperationsRequest } from '../generated/operations.js';
+import { OperationsRequest, PortfolioRequest_CurrencyRequest } from '../generated/operations.js';
 import { PostOrderRequest } from '../generated/orders.js';
 import { SandboxPayInRequest } from '../generated/sandbox.js';
 import { OmitAccount, CommonAccountMethods } from './types.js';
 
 export class SandboxAccount implements CommonAccountMethods {
-  constructor(public api: TinkoffInvestApi, public accountId: string) {}
+  constructor(
+    public api: TinkoffInvestApi,
+    public accountId: string,
+    public currency: PortfolioRequest_CurrencyRequest
+  ) {}
 
   isSandbox(): this is SandboxAccount { return true; }
 
@@ -18,7 +22,7 @@ export class SandboxAccount implements CommonAccountMethods {
   }
 
   async getPortfolio() {
-    return this.api.sandbox.getSandboxPortfolio({ accountId: this.accountId });
+    return this.api.sandbox.getSandboxPortfolio({ accountId: this.accountId, currency: this.currency });
   }
 
   async getOperations(request: OmitAccount<OperationsRequest>) {
